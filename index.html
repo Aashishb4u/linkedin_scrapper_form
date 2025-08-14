@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Apollo Sheet Linker</title>
+    <title>LinkedIn Leads Scrapper</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script>
       // Tailwind CDN configuration for custom theme accents
@@ -136,11 +136,12 @@
 
     <script>
       // ====== Config ======
-      const API_BASE = 'http://localhost:3000'; // Change to your backend origin
+      // Using MockAPI endpoints provided
       const ENDPOINTS = {
-        sheets: () => `${API_BASE}/sheets`,
-        tabs: (sheetId) => `${API_BASE}/sheets/${encodeURIComponent(sheetId)}/tabs`,
-        submit: () => `${API_BASE}/submit`,
+        sheets: () => 'https://689b2f28e727e9657f64196c.mockapi.io/api/v1/sheets',
+        tabs: () => 'https://689b2f28e727e9657f64196c.mockapi.io/api/v1/tabs',
+        // Adjust submit endpoint as needed for your backend
+        submit: () => 'http://localhost:3000/submit',
       };
 
       // ====== DOM Helpers ======
@@ -199,11 +200,11 @@
         try {
           const res = await fetch(ENDPOINTS.sheets());
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json(); // Expect: [{id, name}]
+          const data = await res.json(); // Expect: [{ id, sheet_name }]
           currentSheets = Array.isArray(data) ? data : [];
 
           sheetSelect.innerHTML = '<option value="" disabled selected>Choose a sheet</option>' +
-            currentSheets.map(s => `<option value="${String(s.id ?? s.name)}">${String(s.name ?? s.title ?? s.id)}</option>`).join('');
+            currentSheets.map(s => `<option value="${String(s.sheet_name)}">${String(s.sheet_name)}</option>`).join('');
 
           if (currentSheets.length === 0) {
             hide(sheetsState.loading); show(sheetsState.empty);
@@ -217,17 +218,18 @@
         }
       }
 
-      async function fetchTabs(sheetId) {
+      async function fetchTabs(sheetName) {
         hide(tabsState.error); hide(tabsState.empty); hide(tabsState.idle); show(tabsState.loading);
         tabSelect.disabled = true;
         try {
-          const res = await fetch(ENDPOINTS.tabs(sheetId));
+          const res = await fetch(ENDPOINTS.tabs());
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json(); // Expect: [{id, name}]
-          currentTabs = Array.isArray(data) ? data : [];
+          const data = await res.json(); // Expect: [{ id, tabs, sheet_name }]
+          const filtered = (Array.isArray(data) ? data : []).filter(t => String(t.sheet_name) === String(sheetName));
+          currentTabs = filtered;
 
           tabSelect.innerHTML = '<option value="" disabled selected>Choose a tab</option>' +
-            currentTabs.map(t => `<option value="${String(t.id ?? t.name)}">${String(t.name ?? t.title ?? t.id)}</option>`).join('');
+            currentTabs.map(t => `<option value="${String(t.id)}">${String(t.tabs)}</option>`).join('');
 
           if (currentTabs.length === 0) {
             hide(tabsState.loading); show(tabsState.empty);
@@ -247,6 +249,10 @@
         apolloError.classList.toggle('hidden', valid || val.length === 0);
         if (val.length > 0) {
           show(createNewWrap);
+          // Default to creating a new sheet
+          createNew.checked = true;
+          hide(existingFlow);
+          show(submitWrap);
         } else {
           hide(createNewWrap);
           hide(existingFlow);
@@ -276,17 +282,17 @@
       $('#retrySheets').addEventListener('click', fetchSheets);
 
       sheetSelect.addEventListener('change', async (e) => {
-        const sheetId = e.target.value;
+        const sheetName = e.target.value;
         // Reset tabs area and fetch
         tabSelect.innerHTML = '<option value="" disabled selected>Choose a tab</option>';
         tabSelect.disabled = true;
         hide(submitWrap);
-        await fetchTabs(sheetId);
+        await fetchTabs(sheetName);
       });
 
       $('#retryTabs').addEventListener('click', () => {
-        const sheetId = sheetSelect.value;
-        if (sheetId) fetchTabs(sheetId);
+        const sheetName = sheetSelect.value;
+        if (sheetName) fetchTabs(sheetName);
       });
 
       tabSelect.addEventListener('change', () => {
@@ -304,20 +310,19 @@
           return;
         }
 
-        const creating = createNew.checked;
+        const creating = createNew.checked; // Defaults to true; user can uncheck to choose existing
         const payload = { apolloLink: link, createNewSheet: creating };
 
         if (!creating) {
-          const sheetId = sheetSelect.value;
+          const sheetName = sheetSelect.value;
           const tabId = tabSelect.value;
-          if (!sheetId || !tabId) return; // Should not happen when UI is correct
+          if (!sheetName || !tabId) return;
 
-          const sheetObj = currentSheets.find(s => String(s.id ?? s.name) === sheetId);
-          const tabObj = currentTabs.find(t => String(t.id ?? t.name) === tabId);
-          payload.sheetId = sheetId;
-          payload.sheetName = sheetObj?.name ?? sheetObj?.title ?? sheetId;
+          const sheetObj = currentSheets.find(s => String(s.sheet_name) === sheetName);
+          const tabObj = currentTabs.find(t => String(t.id) === tabId);
+          payload.sheetName = sheetName;
           payload.tabId = tabId;
-          payload.tabName = tabObj?.name ?? tabObj?.title ?? tabId;
+          payload.tabName = tabObj?.tabs ?? tabId;
         }
 
         // UI: set loading state
