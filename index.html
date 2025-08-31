@@ -1,365 +1,586 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LinkedIn Leads Scrapper</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script>
-      // Tailwind CDN configuration for custom theme accents
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              midnight: '#0b0b14',
-              neon: {
-                purple: '#8b5cf6',
-                pink: '#ec4899',
-              },
-            },
-            boxShadow: {
-              glass: '0 10px 30px rgba(139, 92, 246, 0.25)',
-            },
-            backdropBlur: {
-              xs: '2px',
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LinkedIn Leads Scrapper</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-3fpL4zJkQyk+YmXWUN8Z8aF9rM1sJgk0/0tBz1xS0mY=" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+  <script>
+    // Tailwind CDN configuration for custom theme accents
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            montserrat: ['Montserrat', 'sans-serif'],
+          },
+          colors: {
+            midnight: '#0b0b14',
+            neon: {
+              purple: '#8b5cf6',
+              pink: '#ec4899',
             },
           },
+          boxShadow: {
+            glass: '0 10px 30px rgba(139, 92, 246, 0.25)',
+          },
+          backdropBlur: {
+            xs: '2px',
+          },
         },
-      };
-    </script>
-    <style>
-      /* Subtle grain for depth */
-      .grain:before { content: ''; position: fixed; inset: 0; pointer-events: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\'><filter id=\'n\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'2\' stitchTiles=\'stitch\'/></filter><rect width=\'100%\' height=\'100%\' filter=\'url(%23n)\' opacity=\'0.03\'/></svg>'); }
-    </style>
-  </head>
-  <body class="min-h-screen grain bg-gradient-to-br from-black via-purple-950 to-black text-white selection:bg-purple-500/30">
-    <div class="min-h-screen w-full flex items-center justify-center p-4">
-      <div class="relative w-full max-w-3xl">
-        <!-- Decorative glow -->
-        <div class="absolute -inset-1 rounded-3xl bg-gradient-to-r from-purple-600/40 via-fuchsia-500/30 to-purple-700/40 blur-2xl"></div>
+      },
+    };
+  </script>
+  <style>
+    /* Subtle grain for depth */
+    .grain:before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\'><filter id=\'n\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'2\' stitchTiles=\'stitch\'/></filter><rect width=\'100%\' height=\'100%\' filter=\'url(%23n)\' opacity=\'0.03\'/></svg>');
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+  </style>
+  
+</head>
 
-        <!-- Glass card -->
-        <div class="relative rounded-3xl border border-white/10 bg-white/10 backdrop-blur-xl shadow-glass">
-          <div class="px-6 sm:px-10 py-8 sm:py-10">
-            <header class="mb-6 sm:mb-8">
-              <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight">LinkedIn Leads Scrapper</h1>
-              <p class="text-sm text-white/70 mt-2">Paste an Apollo link, then choose to create a new sheet or select an existing sheet and tab.</p>
-            </header>
+<body
+  class="min-h-screen grain bg-gradient-to-br from-black via-purple-950 to-black text-white selection:bg-purple-500/30 flex items-center justify-center">
 
-            <form id="apolloForm" class="space-y-6" novalidate>
-              <!-- Apollo Link -->
+    <!-- Glassmorphic card -->
+    <div id="loginScreen" class="bg-gradient-to-r from-purple-600/40 via-fuchsia-500/30 to-purple-700/40 p-8 rounded-2xl shadow-lg max-w-sm w-full border border-white/30">
+      <h1 class="text-2xl font-bold text-white text-center mb-6">Login</h1>
+      <form id="loginForm" class="flex flex-col gap-4">
+        <input 
+          type="text" 
+          name="username" 
+          placeholder="Username"
+          class="px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300"
+          required
+        />
+        <input 
+          type="password" 
+          name="password" 
+          placeholder="Password"
+          class="px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300"
+          required
+        />
+        <button 
+          type="submit"
+          class="rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white font-bold py-2 rounded-lg transition-colors"
+        >
+          Sign In
+        </button>
+      </form>
+      <p id="loginMsg" class="mt-4 text-center text-white"></p>
+    </div>
+
+  <div id="appDashboard" class="hidden min-h-screen w-full flex items-center justify-center p-4">
+    <div class="relative w-full max-w-3xl">
+      <!-- Decorative glow -->
+      <div 
+        class="absolute -inset-1 rounded-3xl bg-gradient-to-r from-purple-600/40 via-fuchsia-500/30 to-purple-700/40 blur-2xl">
+      </div>
+
+      <!-- Glass card -->
+      <div class="relative rounded-3xl border border-white/10 bg-gradient-to-r from-purple-600/40 via-fuchsia-500/30 to-purple-700/40 shadow-glass">
+        <div class="px-6 sm:px-10 py-8 sm:py-10">
+          <header class="mb-6 sm:mb-8">
+            <h1 class="text-2xl sm:text-3xl  tracking-tight">LinkedIn Leads Scrapper</h1>
+            <p class="text-sm text-white/70 mt-2">Paste an Apollo link, then choose to create a new sheet or select an
+              existing sheet and tab.</p>
+              <div class="absolute top-[20px] right-[30px]">
+                <i class="fa fa-gear text-xl"></i>
+              </div>
+          </header>
+
+          <form id="apolloForm" class="space-y-6" novalidate>
+            <!-- Apollo Link -->
+            <div>
+              <label for="apolloLink" class="block text-sm font-medium mb-2">Enter Apollo Link</label>
+              <div class="relative">
+                <textarea id="apolloLink" name="apolloLink" rows="10" placeholder="https://app.apollo.io/..."
+                  class="w-full resize-y rounded-2xl bg-white/10 focus:bg-white/15 outline-none border border-white/10 focus:border-purple-400/60 px-4 py-3 text-sm placeholder-white/40 shadow-inner shadow-black/10 transition"></textarea>
+                <!-- <div id="linkHelper" class="absolute right-2 bottom-2 text-[11px] text-white/60">Press Enter or click outside to continue</div> -->
+              </div>
+              <p id="apolloError" class="mt-2 text-xs text-rose-400 hidden">Please enter a valid URL.</p>
+            </div>
+
+            <!-- Create new sheet checkbox (revealed after link) -->
+            <div id="createNewWrap" class="hidden flex flex-col gap-4">
+              <label class="inline-flex items-start gap-3 cursor-pointer select-none">
+                <input id="createNew" type="checkbox"
+                  class="mt-1 h-5 w-5 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-purple-400/60" />
+                <span>
+                  <span class="block text-sm font-medium">Do you want to create new sheet?</span>
+                  <span class="block text-xs text-white/60">If unchecked, pick an existing sheet and tab.</span>
+                </span>
+              </label>
+            </div>
+
+            <div id="newSheetFlow" class="hidden space-y-5">
+              <div class="flex w-full gap-4">
+                <div class="relative flex-1">
+                  <label for="newSheetName" class="block text-sm font-medium mb-2">Sheet Name</label>
+                  <input placeholder="Enter Sheet Name" id="newSheetName" type="text"
+                    class="w-full rounded-2xl bg-white/10 border border-white/10 px-4 py-3 text-sm focus:outline-none focus:border-purple-400/60 disabled:opacity-50">
+                </div>
+
+                <div class="relative flex-1">
+                  <label for="newTabName" class="block text-sm font-medium mb-2">Tab Name</label>
+                  <input placeholder="Enter Tab Name" id="newTabName" type="text"
+                    class="w-full rounded-2xl bg-white/10 border border-white/10 px-4 py-3 text-sm focus:outline-none focus:border-purple-400/60 disabled:opacity-50">
+                </div>
+              </div>
+            </div>
+
+            <!-- Existing sheet + tab flow (only when createNew unchecked) -->
+            <div id="existingFlow" class="hidden space-y-5">
+              <!-- Sheets dropdown -->
               <div>
-                <label for="apolloLink" class="block text-sm font-medium mb-2">Enter Apollo Link</label>
-                <div class="relative">
-                  <textarea id="apolloLink" name="apolloLink" rows="3" placeholder="https://app.apollo.io/..." class="w-full resize-y rounded-2xl bg-white/10 focus:bg-white/15 outline-none border border-white/10 focus:border-purple-400/60 px-4 py-3 text-sm placeholder-white/40 shadow-inner shadow-black/10 transition"></textarea>
-                  <!-- <div id="linkHelper" class="absolute right-2 bottom-2 text-[11px] text-white/60">Press Enter or click outside to continue</div> -->
-                </div>
-                <p id="apolloError" class="mt-2 text-xs text-rose-400 hidden">Please enter a valid URL.</p>
-              </div>
-
-              <!-- Create new sheet checkbox (revealed after link) -->
-              <div id="createNewWrap" class="hidden">
-                <label class="inline-flex items-start gap-3 cursor-pointer select-none">
-                  <input id="createNew" type="checkbox" class="mt-1 h-5 w-5 rounded border-white/20 bg-white/10 text-purple-500 focus:ring-purple-400/60" />
-                  <span>
-                    <span class="block text-sm font-medium">Do you want to create new sheet?</span>
-                    <span class="block text-xs text-white/60">If unchecked, pick an existing sheet and tab.</span>
-                  </span>
-                </label>
-              </div>
-
-              <!-- Existing sheet + tab flow (only when createNew unchecked) -->
-              <div id="existingFlow" class="hidden space-y-5">
-                <!-- Sheets dropdown -->
-                <div>
-                  <div class="flex items-center justify-between mb-2">
-                    <label for="sheetSelect" class="block text-sm font-medium">Select existing sheet</label>
-                    <button type="button" id="reloadSheets" class="text-xs text-purple-300 hover:text-purple-200 disabled:opacity-40">Reload</button>
-                  </div>
-
-                  <div id="sheetsState_idle" class="relative">
-                    <select id="sheetSelect" class="w-full rounded-2xl bg-white/10 border border-white/10 px-4 py-3 text-sm focus:outline-none focus:border-purple-400/60 disabled:opacity-50">
-                      <option value="" selected disabled>Choose a sheet</option>
-                    </select>
-                  </div>
-
-                  <div id="sheetsState_loading" class="hidden flex items-center gap-3 text-sm text-white/70">
-                    <div class="h-4 w-4 rounded-full border-2 border-white/20 border-l-purple-400 animate-spin"></div>
-                    Loading sheets...
-                  </div>
-
-                  <div id="sheetsState_error" class="hidden text-sm text-rose-300">
-                    Failed to load sheets.
-                    <button type="button" id="retrySheets" class="ml-2 text-purple-300 hover:text-purple-200 underline">Retry</button>
-                  </div>
-
-                  <div id="sheetsState_empty" class="hidden text-sm text-white/70">No sheets found. You may create a new one instead.</div>
+                <div class="flex items-center justify-between mb-2">
+                  <label for="sheetSelect" class="block text-sm font-medium">Select existing sheet</label>
+                  <button type="button" id="reloadSheets"
+                    class="text-xs text-purple-300 hover:text-purple-200 disabled:opacity-40">Reload</button>
                 </div>
 
-                <!-- Tabs dropdown (depends on sheet selection) -->
-                <div>
-                  <label for="tabSelect" class="block text-sm font-medium mb-2">Select tab</label>
+                <div id="sheetsState_idle" class="relative">
+                  <select id="sheetSelect"
+                    class="w-full rounded-2xl bg-white/10 border border-white/10 px-4 py-3 text-sm focus:outline-none focus:border-purple-400/60 disabled:opacity-50">
+                    <option value="" selected disabled>Choose a sheet</option>
+                  </select>
+                </div>
 
-                  <div id="tabsState_idle" class="relative">
-                    <select id="tabSelect" class="w-full rounded-2xl bg-white/10 border border-white/10 px-4 py-3 text-sm focus:outline-none focus:border-purple-400/60 disabled:opacity-50" disabled>
-                      <option value="" selected disabled>Choose a tab</option>
-                    </select>
-                  </div>
+                <div id="sheetsState_loading" class="hidden flex items-center gap-3 text-sm text-white/70">
+                  <div class="h-4 w-4 rounded-full border-2 border-white/20 border-l-purple-400 animate-spin"></div>
+                  Loading sheets...
+                </div>
 
-                  <div id="tabsState_loading" class="hidden flex items-center gap-3 text-sm text-white/70">
-                    <div class="h-4 w-4 rounded-full border-2 border-white/20 border-l-purple-400 animate-spin"></div>
-                    Loading tabs...
-                  </div>
+                <div id="sheetsState_error" class="hidden text-sm text-rose-300">
+                  Failed to load sheets.
+                  <button type="button" id="retrySheets"
+                    class="ml-2 text-purple-300 hover:text-purple-200 underline">Retry</button>
+                </div>
 
-                  <div id="tabsState_error" class="hidden text-sm text-rose-300">
-                    Failed to load tabs.
-                    <button type="button" id="retryTabs" class="ml-2 text-purple-300 hover:text-purple-200 underline">Retry</button>
-                  </div>
+                <div id="sheetsState_empty" class="hidden text-sm text-white/70">No sheets found. You may create a new
+                  one instead.</div>
+              </div>
 
-                  <div id="tabsState_empty" class="hidden text-sm text-white/70">No tabs found for the selected sheet.</div>
+              <!-- Tabs dropdown (depends on sheet selection) -->
+              <div>
+                <label for="tabSelect" class="block text-sm font-medium mb-2">Select tab</label>
+
+                <div id="tabsState_idle" class="relative">
+                  <select id="tabSelect"
+                    class="w-full rounded-2xl bg-white/10 border border-white/10 px-4 py-3 text-sm focus:outline-none focus:border-purple-400/60 disabled:opacity-50"
+                    disabled>
+                    <option value="" selected disabled>Choose a tab</option>
+                  </select>
+                </div>
+
+                <div id="tabsState_loading" class="hidden flex items-center gap-3 text-sm text-white/70">
+                  <div class="h-4 w-4 rounded-full border-2 border-white/20 border-l-purple-400 animate-spin"></div>
+                  Loading tabs...
+                </div>
+
+                <div id="tabsState_error" class="hidden text-sm text-rose-300">
+                  Failed to load tabs.
+                  <button type="button" id="retryTabs"
+                    class="ml-2 text-purple-300 hover:text-purple-200 underline">Retry</button>
+                </div>
+
+                <div id="tabsState_empty" class="hidden text-sm text-white/70">No tabs found for the selected sheet.
                 </div>
               </div>
+            </div>
 
-              <!-- Submit button -->
-              <div id="submitWrap" class="hidden pt-2">
-                <button id="submitBtn" type="submit" class="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 px-6 py-3 text-sm font-medium shadow-lg shadow-purple-900/30 ring-1 ring-white/10 hover:from-purple-500 hover:to-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-purple-400/60 disabled:opacity-50 disabled:cursor-not-allowed">
-                  <span>Submit</span>
-                  <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                </button>
-                <div id="submitStatus" class="mt-3 text-sm text-white/80 hidden"></div>
-              </div>
-            </form>
-          </div>
+            <!-- Submit button -->
+            <div id="submitWrap" class="hidden pt-2">
+              <button id="submitBtn" type="submit"
+                class="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 px-6 py-3 text-sm font-medium shadow-lg shadow-purple-900/30 ring-1 ring-white/10 hover:from-purple-500 hover:to-fuchsia-500 focus:outline-none focus:ring-2 focus:ring-purple-400/60 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span>Submit</span>
+                <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+            <div id="submitStatus" class="gap-4 mt-3 flex items-center text-sm text-white/80 hidden"></div>
+          </form>
         </div>
       </div>
     </div>
+  </div>
 
-    <script>
-      // ====== Config ======
-      // Using MockAPI endpoints provided
-      const ENDPOINTS = {
-        sheets: () => 'https://689b2f28e727e9657f64196c.mockapi.io/api/v1/sheets',
-        tabs: () => 'https://689b2f28e727e9657f64196c.mockapi.io/api/v1/tabs',
-        // Adjust submit endpoint as needed for your backend
-        submit: () => 'http://localhost:3000/submit',
-      };
+  <script>
+    // ====== Config ======
+    // Using MockAPI endpoints provided
+    const ENDPOINTS = {
+      // sheets: () => '/api/spreadsheets',
+      sheets: () => 'http://localhost:3000/api/spreadsheets',
+      // tabs: (sheetId) => `/api/spreadsheets/${encodeURIComponent(sheetId)}/tabs`,
+      tabs: (sheetId) => `http://localhost:3000/api/spreadsheets/${encodeURIComponent(sheetId)}/tabs`,
+      // submit: () => '/api/submit',
+      submit: () => 'http://localhost:3000/api/submit',
 
-      // ====== DOM Helpers ======
-      const $ = (sel) => document.querySelector(sel);
-      const show = (el) => el.classList.remove('hidden');
-      const hide = (el) => el.classList.add('hidden');
-      const setText = (el, txt) => { el.textContent = txt; };
-      const isValidUrl = (u) => {
-        try { new URL(u); return true; } catch { return false; }
-      };
+      login: () => 'http://localhost:3000/api/login',
 
-      // ====== Elements ======
-      const apolloLink = $('#apolloLink');
-      const apolloError = $('#apolloError');
-      const createNewWrap = $('#createNewWrap');
-      const createNew = $('#createNew');
-      const existingFlow = $('#existingFlow');
-      const sheetSelect = $('#sheetSelect');
-      const tabSelect = $('#tabSelect');
-      const submitWrap = $('#submitWrap');
-      const submitBtn = $('#submitBtn');
-      const submitStatus = $('#submitStatus');
+      // create new sheet
+      createSheet: () => 'http://localhost:3000/api/spreadsheets/create',
+    };
 
-      // Loading/Error states containers
-      const sheetsState = {
-        idle: $('#sheetsState_idle'),
-        loading: $('#sheetsState_loading'),
-        error: $('#sheetsState_error'),
-        empty: $('#sheetsState_empty'),
-      };
-      const tabsState = {
-        idle: $('#tabsState_idle'),
-        loading: $('#tabsState_loading'),
-        error: $('#tabsState_error'),
-        empty: $('#tabsState_empty'),
-      };
+    // ====== DOM Helpers ======
+    const $ = (sel) => document.querySelector(sel);
+    const show = (el) => el.classList.remove('hidden');
+    const hide = (el) => el.classList.add('hidden');
+    const setText = (el, txt) => { el.textContent = txt; };
+    const isValidUrl = (u) => {
+      try { new URL(u); return true; } catch { return false; }
+    };
 
-      // ====== State ======
-      let currentSheets = [];
-      let currentTabs = [];
+    // ====== Elements ======
+    const apolloLink = $('#apolloLink');
+    const apolloError = $('#apolloError');
+    const createNewWrap = $('#createNewWrap');
+    const createNew = $('#createNew');
+    const existingFlow = $('#existingFlow');
+    const sheetSelect = $('#sheetSelect');
+    const tabSelect = $('#tabSelect');
+    const submitWrap = $('#submitWrap');
+    const submitBtn = $('#submitBtn');
+    const submitStatus = $('#submitStatus');
+    const newSheetName = $('#newSheetName');
+    const newTabName = $('#newTabName');
+    const loginScreen = $('#loginScreen');
+    const appDashboard = $('#appDashboard');
+    const msg = $('#loginMsg');
 
-      function resetExistingFlow() {
-        // Reset sheets/tabs selects and states
-        sheetSelect.innerHTML = '<option value="" disabled selected>Choose a sheet</option>';
-        sheetSelect.disabled = false;
-        tabSelect.innerHTML = '<option value="" disabled selected>Choose a tab</option>';
-        tabSelect.disabled = true;
-        hide(sheetsState.loading); hide(sheetsState.error); hide(sheetsState.empty); show(sheetsState.idle);
-        hide(tabsState.loading); hide(tabsState.error); hide(tabsState.empty); show(tabsState.idle);
-        hide(submitWrap);
-      }
+    // Attach listeners
+    // sheetSelect.addEventListener('change', checkFormReady);
+    // tabSelect.addEventListener('change', checkFormReady);
+    // newSheetName.addEventListener('change', checkFormReady);
+    apolloLink.addEventListener('input', checkFormReady);
+    newTabName.addEventListener('keyup', checkFormReady);
+    createNew.addEventListener('keyup', checkFormReady);
+    // submitBtn.disabled = true; // already done in your handler
 
-      async function fetchSheets() {
-        hide(sheetsState.error); hide(sheetsState.empty); hide(sheetsState.idle); show(sheetsState.loading);
-        sheetSelect.disabled = true;
-        try {
-          const res = await fetch(ENDPOINTS.sheets());
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json(); // Expect: [{ id, sheet_name }]
-          currentSheets = Array.isArray(data) ? data : [];
+    // Loading/Error states containers
+    const sheetsState = {
+      idle: $('#sheetsState_idle'),
+      loading: $('#sheetsState_loading'),
+      error: $('#sheetsState_error'),
+      empty: $('#sheetsState_empty'),
+    };
+    const tabsState = {
+      idle: $('#tabsState_idle'),
+      loading: $('#tabsState_loading'),
+      error: $('#tabsState_error'),
+      empty: $('#tabsState_empty'),
+    };
 
-          sheetSelect.innerHTML = '<option value="" disabled selected>Choose a sheet</option>' +
-            currentSheets.map(s => `<option value="${String(s.sheet_name)}">${String(s.sheet_name)}</option>`).join('');
+    // ====== State ======
+    let currentSheets = [];
+    let currentTabs = [];
 
-          if (currentSheets.length === 0) {
-            hide(sheetsState.loading); show(sheetsState.empty);
-          } else {
-            hide(sheetsState.loading); show(sheetsState.idle);
-            sheetSelect.disabled = false;
-          }
-        } catch (e) {
-          console.error('Sheets fetch failed:', e);
-          hide(sheetsState.loading); show(sheetsState.error);
-        }
-      }
+    function resetExistingFlow() {
+      // Reset sheets/tabs selects and states
+      sheetSelect.innerHTML = '<option value="" disabled selected>Choose a sheet</option>';
+      sheetSelect.disabled = false;
+      tabSelect.innerHTML = '<option value="" disabled selected>Choose a tab</option>';
+      tabSelect.disabled = true;
+      hide(sheetsState.loading); hide(sheetsState.error); hide(sheetsState.empty); show(sheetsState.idle);
+      hide(tabsState.loading); hide(tabsState.error); hide(tabsState.empty); show(tabsState.idle);
+      hide(submitWrap);
+    }
 
-      async function fetchTabs(sheetName) {
-        hide(tabsState.error); hide(tabsState.empty); hide(tabsState.idle); show(tabsState.loading);
-        tabSelect.disabled = true;
-        try {
-          const res = await fetch(ENDPOINTS.tabs());
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const data = await res.json(); // Expect: [{ id, tabs, sheet_name }]
-          const filtered = (Array.isArray(data) ? data : []).filter(t => String(t.sheet_name) === String(sheetName));
-          currentTabs = filtered;
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-          tabSelect.innerHTML = '<option value="" disabled selected>Choose a tab</option>' +
-            currentTabs.map(t => `<option value="${String(t.id)}">${String(t.tabs)}</option>`).join('');
+      const username = loginForm.username.value.trim();
+      const password = loginForm.password.value.trim();
 
-          if (currentTabs.length === 0) {
-            hide(tabsState.loading); show(tabsState.empty);
-          } else {
-            hide(tabsState.loading); show(tabsState.idle);
-            tabSelect.disabled = false;
-          }
-        } catch (e) {
-          console.error('Tabs fetch failed:', e);
-          hide(tabsState.loading); show(tabsState.error);
-        }
-      }
+      try {
+        const res = await fetch(ENDPOINTS.login(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
 
-      function revealCheckboxIfReady() {
-        const val = apolloLink.value.trim();
-        const valid = val.length > 0 && isValidUrl(val);
-        apolloError.classList.toggle('hidden', valid || val.length === 0);
-        if (val.length > 0) {
-          show(createNewWrap);
-          // Default to creating a new sheet
-          createNew.checked = true;
-          hide(existingFlow);
-          show(submitWrap);
+        const data = await res.json();
+        if (data.ok) {
+          msg.textContent = '✅ Login successful!';
+          msg.classList.remove('text-red-300');
+          msg.classList.add('text-green-300');
+          hide(loginScreen);
+          show(appDashboard);
         } else {
-          hide(createNewWrap);
-          hide(existingFlow);
-          hide(submitWrap);
+          msg.textContent = `❌ ${data.error || 'Login failed'}`;
+          msg.classList.remove('text-green-300');
+          msg.classList.add('text-red-300');
         }
+      } catch (err) {
+        msg.textContent = '❌ Network error';
+        msg.classList.remove('text-green-300');
+        msg.classList.add('text-red-300');
+      }
+    });
+
+    async function fetchSheets() {
+      hide(sheetsState.error); hide(sheetsState.empty); hide(sheetsState.idle); show(sheetsState.loading);
+      sheetSelect.disabled = true;
+      try {
+        const res = await fetch(ENDPOINTS.sheets());
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json(); // Expect: { files: [{ id, name }] }
+        currentSheets = Array.isArray(data.files) ? data.files : [];
+
+        sheetSelect.innerHTML = '<option value="" disabled selected>Choose a sheet</option>' +
+          currentSheets.map(s => `<option value="${String(s.id)}">${String(s.name)}</option>`).join('');
+
+        if (currentSheets.length === 0) {
+          hide(sheetsState.loading); show(sheetsState.empty);
+        } else {
+          hide(sheetsState.loading); show(sheetsState.idle);
+          sheetSelect.disabled = false;
+        }
+      } catch (e) {
+        console.error('Sheets fetch failed:', e);
+        hide(sheetsState.loading); show(sheetsState.error);
+      }
+    }
+
+    async function fetchTabsById(sheetId) {
+      hide(tabsState.error); hide(tabsState.empty); hide(tabsState.idle); show(tabsState.loading);
+      tabSelect.disabled = true;
+      try {
+        const res = await fetch(ENDPOINTS.tabs(sheetId));
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json(); // Expect: { tabs: [{ id, title }] }
+        currentTabs = Array.isArray(data.tabs) ? data.tabs : [];
+
+        tabSelect.innerHTML = '<option value="" disabled selected>Choose a tab</option>' +
+          currentTabs.map(t => `<option value="${String(t.id)}">${String(t.title)}</option>`).join('');
+
+        if (currentTabs.length === 0) {
+          hide(tabsState.loading); show(tabsState.empty);
+        } else {
+          hide(tabsState.loading); show(tabsState.idle);
+          tabSelect.disabled = false;
+        }
+      } catch (e) {
+        console.error('Tabs fetch failed:', e);
+        hide(tabsState.loading); show(tabsState.error);
+      }
+    }
+
+    function revealCheckboxIfReady() {
+      const val = apolloLink.value.trim();
+      const valid = val.length > 0 && isValidUrl(val);
+      apolloError.classList.toggle('hidden', valid || val.length === 0);
+      if (val.length > 0) {
+        show(createNewWrap);
+        createNew.checked = true;
+        hide(existingFlow);
+        show(newSheetFlow);
+        hide(submitStatus);
+      } else {
+        hide(createNewWrap);
+        hide(existingFlow);
+        hide(submitWrap);
+        hide(newSheetFlow);
+      }
+    }
+
+    // ====== Event wiring ======
+    apolloLink.addEventListener('input', revealCheckboxIfReady);
+    apolloLink.addEventListener('blur', revealCheckboxIfReady);
+    apolloLink.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); apolloLink.blur(); } });
+
+    createNew.addEventListener('change', async (e) => {
+      const checked = e.target.checked;
+      if (checked) {
+        hide(existingFlow);
+        show(newSheetFlow);
+        if (newSheetName.value && newTabName.value) show(submitWrap);
+        // show(submitWrap);
+      } else {
+        // Show existing flow and load sheets
+        show(existingFlow);
+        hide(newSheetFlow);
+        resetExistingFlow();
+        await fetchSheets();
+      }
+    });
+
+    $('#reloadSheets').addEventListener('click', fetchSheets);
+    $('#retrySheets').addEventListener('click', fetchSheets);
+
+    sheetSelect.addEventListener('change', async (e) => {
+      const sheetId = e.target.value;
+      // Reset tabs area and fetch
+      tabSelect.innerHTML = '<option value="" disabled selected>Choose a tab</option>';
+      tabSelect.disabled = true;
+      hide(submitWrap);
+      await fetchTabsById(sheetId);
+    });
+
+
+    $('#retryTabs').addEventListener('click', () => {
+      const sheetId = sheetSelect.value;
+      if (sheetId) fetchTabsById(sheetId);
+    });
+
+    tabSelect.addEventListener('change', () => {
+      if (tabSelect.value) show(submitWrap);
+      else hide(submitWrap);
+    });
+    // ===== Helpers =====
+    function formatDate(date = new Date()) {
+      return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    }
+
+    function setStatus(message, ok = true) {
+      submitStatus.innerHTML = message;
+      submitStatus.classList.toggle('text-rose-300', !ok);
+      submitStatus.classList.toggle('text-emerald-300', ok);
+      show(submitStatus);
+    }
+
+    function setButtonLoading(isLoading) {
+      submitBtn.disabled = isLoading;
+      submitBtn.classList.toggle('opacity-60', isLoading);
+    }
+
+    // ====== Submit handling ======
+    $('#apolloForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const link = apolloLink.value.trim();
+
+      if (!isValidUrl(link)) {
+        apolloError.classList.remove('hidden');
+        apolloLink.focus();
+        return;
       }
 
-      // ====== Event wiring ======
-      apolloLink.addEventListener('input', revealCheckboxIfReady);
-      apolloLink.addEventListener('blur', revealCheckboxIfReady);
-      apolloLink.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); apolloLink.blur(); } });
+      let payload = { apollo_link: link };
+      let spreadsheetUrl = '';
 
-      createNew.addEventListener('change', async (e) => {
-        const checked = e.target.checked;
-        if (checked) {
-          hide(existingFlow);
-          show(submitWrap);
-        } else {
-          // Show existing flow and load sheets
-          show(existingFlow);
-          resetExistingFlow();
-          await fetchSheets();
-        }
-      });
+      const creating = createNew.checked;
 
-      $('#reloadSheets').addEventListener('click', fetchSheets);
-      $('#retrySheets').addEventListener('click', fetchSheets);
+      setButtonLoading(true);
+      hide(submitStatus);
+      setText(submitStatus, '');
 
-      sheetSelect.addEventListener('change', async (e) => {
-        const sheetName = e.target.value;
-        // Reset tabs area and fetch
-        tabSelect.innerHTML = '<option value="" disabled selected>Choose a tab</option>';
-        tabSelect.disabled = true;
-        hide(submitWrap);
-        await fetchTabs(sheetName);
-      });
+      try {
+        if (creating) {
+          // ==== Create new spreadsheet ====
+          const reqParams = {
+            sheetName: newSheetName.value.trim() || 'New Spreadsheet',
+            tabName: newTabName.value.trim() || 'Sheet1'
+          };
 
-      $('#retryTabs').addEventListener('click', () => {
-        const sheetName = sheetSelect.value;
-        if (sheetName) fetchTabs(sheetName);
-      });
-
-      tabSelect.addEventListener('change', () => {
-        if (tabSelect.value) show(submitWrap);
-        else hide(submitWrap);
-      });
-
-      // ====== Submit handling ======
-      $('#apolloForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const link = apolloLink.value.trim();
-        if (!isValidUrl(link)) {
-          apolloError.classList.remove('hidden');
-          apolloLink.focus();
-          return;
-        }
-
-        const creating = createNew.checked; // Defaults to true; user can uncheck to choose existing
-        const payload = { apolloLink: link, createNewSheet: creating };
-
-        if (!creating) {
-          const sheetName = sheetSelect.value;
-          const tabId = tabSelect.value;
-          if (!sheetName || !tabId) return;
-
-          const sheetObj = currentSheets.find(s => String(s.sheet_name) === sheetName);
-          const tabObj = currentTabs.find(t => String(t.id) === tabId);
-          payload.sheetName = sheetName;
-          payload.tabId = tabId;
-          payload.tabName = tabObj?.tabs ?? tabId;
-        }
-
-        // UI: set loading state
-        submitBtn.disabled = true;
-        submitBtn.classList.add('opacity-60');
-        hide(submitStatus); setText(submitStatus, '');
-
-        try {
-          const res = await fetch(ENDPOINTS.submit(), {
+          const res = await fetch(ENDPOINTS.createSheet(), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(reqParams)
           });
-          const text = await res.text();
-          const ok = res.ok;
-          setText(submitStatus, ok ? 'Submitted successfully.' : `Submit failed: ${res.status}. ${text || ''}`);
-          submitStatus.classList.toggle('text-rose-300', !ok);
-          submitStatus.classList.toggle('text-emerald-300', ok);
-          show(submitStatus);
-          if (ok) {
-            // Optionally reset form (keep link to allow repeated submissions)
-            if (!createNew.checked) {
-              resetExistingFlow();
-              hide(existingFlow);
-            }
-          }
-        } catch (err) {
-          console.error('Submit failed:', err);
-          submitStatus.classList.add('text-rose-300');
-          setText(submitStatus, 'Network error while submitting.');
-          show(submitStatus);
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.classList.remove('opacity-60');
-        }
-      });
-    </script>
-  </body>
-</html>
 
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (!data.ok) throw new Error('Failed to create spreadsheet');
+
+          payload = {
+            spreadsheet_id: data.spreadsheetId,
+            apollo_link: link,
+            spreadsheet_url: data.spreadsheetUrl,
+            tab_id: data.tabId
+          };
+          spreadsheetUrl = data.spreadsheetUrl;
+
+        } else {
+          // ==== Use existing spreadsheet ====
+          const sheetId = sheetSelect.value;
+          const tabId = tabSelect.value;
+          if (!sheetId || !tabId) throw new Error('Select both sheet and tab');
+
+          payload = {
+            spreadsheet_id: sheetId,
+            apollo_link: link,
+            tab_id: tabId
+          };
+          spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}`;
+        }
+
+        // ==== Submit payload ====
+        const res = await fetch(ENDPOINTS.submit(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const responseObj = await res.json();
+        const ok = res.ok;
+        const dateNow = formatDate();
+
+        setStatus(
+          ok
+            ? `Submitted successfully on ${dateNow}. 
+          <a href="${spreadsheetUrl}" target="_blank"
+            class="inline-block px-4 py-2 rounded-xl bg-white/10 border border-white/20 backdrop-blur-xl text-sm font-medium text-purple-300 shadow-glass hover:bg-white/20 hover:text-purple-200 transition">
+            Open Spreadsheet
+          </a>`
+            : `Submit failed: ${res.status}. ${JSON.stringify(responseObj)}`,
+          ok
+        );
+
+        if (ok) {
+          // ==== Reset form ====
+          apolloLink.value = '';
+          createNew.checked = true;
+          hide(createNewWrap);
+          hide(existingFlow);
+          hide(newSheetFlow);
+          hide(submitWrap);
+          resetExistingFlow();
+          apolloLink.focus();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+      } catch (err) {
+        console.error('Submit failed:', err);
+        setStatus('Network error while submitting.', false);
+      } finally {
+        setButtonLoading(false);
+      }
+    });
+
+    // Utility to enable/disable button
+    function setSubmitDisabled(disabled) {
+      submitBtn.disabled = disabled;
+      submitBtn.classList.toggle('opacity-50', disabled);
+      submitBtn.classList.toggle('cursor-not-allowed', disabled);
+    }
+
+    // Example: disable when form is invalid
+    function checkFormReady() {
+      const linkValid = apolloLink.value.trim() && isValidUrl(apolloLink.value.trim());
+      const creating = createNew.checked;
+      let ready = linkValid;
+      hide(submitWrap);
+      if (createNew.checked && newSheetName.value && newTabName.value) {
+        show(submitWrap);
+      }
+
+      setSubmitDisabled(!linkValid);
+    }
+  </script>
+</body>
+
+</html>
